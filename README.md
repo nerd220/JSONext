@@ -85,3 +85,18 @@ Difficult example
  	console.log(x.a.body); // returns real document body, because this object was reattached while deserialization works
 
 You can see that in this example, serialization of objects works by taking into account their links, methods, parent prototypes, and prototype chains. At the output, you get a fully functional object, as if it had not been serialized.
+
+## How it works and cons of the approach
+
+The method walks through the object and determines internal links.
+It also identifies links with external objects and records ways to restore them.
+If you need to serialize a method, it turns into string.
+
+During deserialization, the algorithm finds all the object's mount points and attaches it to the right places.
+
+Currently, the method is used for the system of saving complex multiplayer games. The method handles data of several megabytes well.
+
+CONS:
+- Loads CPU when processing large objects
+- May require a specific approach when prototyping objects
+- The method may be unsafe if the user has access to serialization, but unpacking of methods via eval can be disabled
