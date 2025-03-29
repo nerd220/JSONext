@@ -18,7 +18,7 @@ if you have array of objects, you may cover in object like {arr:YouArray}
 - after deserialization, it's will replace on **howGet** expression (expression must manipulate global objects)
 - example: [ [game.units[0].img, 'DB.images[0].data'] ] or  [ [canvas, 'window.canvas'] ]
   
-**recreate** - objects of pointed classes will re created by use object construction function in destination systems (where deserialization will happen), and merge with actual data - Array of class names (object.constructor.name)		
+**recreate** - objects of pointed classes will re created by use object construction function in destination systems (where deserialization will happen), and merge with actual data - Array of class names (object.constructor.name). **Warning**: These classes/constructors must be present in the destination system.
 
 ## to decode use fromLinkedJSON(data, recreateType)
 
@@ -36,3 +36,52 @@ If you don't want change source objects, use structuredClone function for this o
 Warning! Method may use eval calls, that could be unsafe in some cases.
 
 On output you will get standart classic JSON, but some objects are replaced by arrays with special keymarks
+
+## Examples
+
+Simple case
+
+	var a={x: 1};
+	var b={y: 2, z: a};
+	var c={a: a, b: b};
+	var json=toLinkedJSON(c);
+	var x=fromLinkedJSON(json);
+	console.log(x.a == x.b.z); // true, becouse all links are saved
+
+Difficult example
+
+	function constructAProto(){
+  		this.i=1;
+ 		this.protoMethod=function(){
+   			this.i+=2;
+		}
+ 	}
+  
+	function constructA(){
+		// weird but working way of inheritance
+ 		this.__proto__=new constructAProto();
+ 		this.constructor=constructA;
+ 		// data
+   		this.body=document.body;
+ 	}
+  
+  	function constructB(link){
+  		this.someMethod=function(){
+			this.l.i++;
+		}
+		this.l=link;
+   	}
+    
+	var a=new constructA();
+	var b=new constructB(a);
+	var c={linkA: a, linkB: b, method: (o)=>console.log(o.l.i)};
+	var o={a:a, b:b, c:c};
+	var json=toLinkedJSON(o,[[document.body,'document.body']],['constructA','constructB']);
+	var x=fromLinkedJSON(json);
+	x.b.someMethod(); // increase b.a.i
+	x.a.protoMethod(); // double increase a
+	x.c.method(x.b); // log b.l.i, return 4
+	console.log(x.c.linkA === x.b.l); // return true, because all objects are same, the same as it was before serialization
+ 	console.log(x.a.body); // returns real document body, because this object was reattached while deserialization works
+
+You can see that in this example, serialization of objects works by taking into account their links, methods, parent prototypes, and prototype chains. At the output, you get a fully functional object, as if it had not been serialized.
