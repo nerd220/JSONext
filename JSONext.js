@@ -153,7 +153,6 @@ function toLinkedJSON(o,exp=[],recreate=[]){
 }
 
 var mpoints=[];//id -> [object id,keys]
-//var replaces=[];//id -> new object
 function fljNested(o,objects,id=0,keys=[]){
 	if(typeof(o)=='object'  && o.length>1 && o[0]){
 		if(o[0]=='TLJ'){
