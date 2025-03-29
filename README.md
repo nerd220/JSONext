@@ -49,7 +49,9 @@ Simple case
 	console.log(x.a == x.b.z); // true, becouse all links are saved
 
 Difficult example
-
+	
+ 	// setup classses
+ 
 	function constructAProto(){
   		this.i=1;
  		this.protoMethod=function(){
@@ -71,13 +73,24 @@ Difficult example
 		}
 		this.l=link;
    	}
-    
+
+	// create objects and fill data
+     
 	var a=new constructA();
 	var b=new constructB(a);
 	var c={linkA: a, linkB: b, method: (o)=>console.log(o.l.i)};
 	var o={a:a, b:b, c:c};
+
+ 	// serialize objects
+  
 	var json=toLinkedJSON(o,[[document.body,'document.body']],['constructA','constructB']);
+
+ 	// deserialize objects
+  
 	var x=fromLinkedJSON(json);
+
+ 	// test methods and data
+  
 	x.b.someMethod(); // increase b.a.i
 	x.a.protoMethod(); // double increase a
 	x.c.method(x.b); // log b.l.i, return 4
