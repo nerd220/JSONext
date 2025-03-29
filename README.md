@@ -50,7 +50,7 @@ Simple case
 
 Difficult example
 	
- 	// setup classses
+ 	// setup classes
  
 	function constructAProto(){
   		this.i=1;
