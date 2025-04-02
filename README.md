@@ -28,6 +28,7 @@ if you have array of objects, you may cover in object like {arr:YouArray}
 2 - if create function of object have arguments, method try guess this arguments, take it from object fields with same names\
 1 - object use call method of create function and after merge with himself\
 0 - (**default**) like 2 type, but just create __proto__ from prototype\
+3 - like 0 type, but don't guess arguments and don't use eval method
 choose type as you set proto of you object
 
 Beware! This metod is change source object (and all linked objects, childs & etc)\
