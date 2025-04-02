@@ -19,7 +19,8 @@ Also this method may save functions and recreate objects after deserialization (
 		Then object with this types is deserialized, it's create from constructor and merge with actual data		
 
 2. to decode use fromLinkedJSON(recreateType)
-	recreateType	2 - if create function of object have arguments, method try guess this arguments, take it from object fields with same names
+	recreateType		3 - like 0 type, but don't guess arguments (don't use eval methods)
+ 				2 - if create function of object have arguments, method try guess this arguments, take it from object fields with same names
 				1 - object use call method of create function and after merge with himself
 				0 - like 2 type, but just create __proto__ from prototype
 				choose type as you set proto of you object
@@ -245,6 +246,10 @@ function fljMount(o,target,newO){
 	}
 }
 
+function fljGetGlobalConstructor(name){
+	return (window?window[name]:global[name]);
+}
+
 function fromLinkedJSON(s,recreateType=0){
 	var objects=JSON.parse(s);
 	//var objects=asyncParse(s);
@@ -262,10 +267,10 @@ function fromLinkedJSON(s,recreateType=0){
 			} else {
 				var to,cur;
 				cur=objects[i];
-				eval('to='+objects[i].FLJR+';');
+				to=fljGetGlobalConstructor(objects[i].FLJR);
 				var args=(to.toString().split('(')[1].split(')')[0]);
 				var comp=[];
-				if(args!=''){
+				if(args!='' && recreateType!=3){
 					if(args.includes(',')) args=args.split(','); else args=[args];
 					var def=[];
 					for(let j in args){
@@ -292,7 +297,8 @@ function fromLinkedJSON(s,recreateType=0){
 					delete objects[i].FLJR;
 					
 					for(let j of Object.keys(cur)) ok[j]=cur[j];
-					eval('cur=new '+cn+'('+comp+');');
+					if(recreateType==3) cur=new to();
+					else eval('cur=new '+cn+'('+comp+');');
 					for(let j of Object.keys(ok)) cur[j]=ok[j];
 					if(mpoints[i]){
 						for(let j in mpoints[i]){
